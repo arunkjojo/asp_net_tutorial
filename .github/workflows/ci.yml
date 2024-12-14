@@ -75,8 +75,3 @@ jobs:
       # Step 6: Running tests
       - name: Running tests
         run: dotnet test --no-build
-
-      # Step 7: Approve the pull request if all checks pass
-      - name: Approve Pull Request
-        if: success()
-        uses: hmarr/auto-approve-action@v3

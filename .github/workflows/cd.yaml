@@ -20,7 +20,7 @@ jobs:
 
       # Step 2: Setup .NET
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
@@ -38,11 +38,15 @@ jobs:
 
       # Step 6: Publishing
       - name: Publishing
-        run: dotnet publish Release -o ./publish
-
+        run: dotnet publish ./ASP_NET_Tutorial.csproj -c Release -o ./publish
+        env:
+          DOTNET_ROOT: /usr/share/dotnet
+          
       # Step 7: Upload the Artifact
       - name: Upload artifact
-        uses: upload/artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: dotnet-app
           path: ./publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
