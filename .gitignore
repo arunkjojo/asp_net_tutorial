@@ -1,0 +1,26 @@
+# Ignore build artifacts
+bin/
+obj/
+
+# Ignore temporary build output
+publish/
+
+# Ignore user-specific files
+.vs/
+*.user
+*.suo
+*.swp
+
+# Ignore secrets
+appsettings.Production.json
+.env
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+
+# Ignore temporary files
+*.log
+
+# Ignore debug output
+*/Debug/*
