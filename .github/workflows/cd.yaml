@@ -12,6 +12,7 @@ jobs:
       matrix:
         dotnet-version: [7.0.x, 8.0.x, 9.0.x]
         os: [ubuntu-latest] # , windows-latest
+    if: ${{ github.event_name != 'push' }}  # Skip for merged PRs (push event)
 
     steps:
       # Step 1: Checkout the repository
