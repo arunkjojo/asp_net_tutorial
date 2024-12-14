@@ -7,41 +7,42 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         dotnet-version: [7.0.x, 8.0.x, 9.0.x]
+        os: [ubuntu-latest] # , windows-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      # Step 1: Checkout the repository
+      - name: Checkout repo
+        uses: actions/checkout@v3
 
-    # Step 2: Setup .NET
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+      # Step 2: Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
 
-    # Step 3: Restoring dependencies
-    - name: Restoring dependencies
-      run: dotnet restore
-    
-    # Step 4: Build solution
-    - name: Build solution
-      run: dotnet build --configuration Release --no-restore
-    
-    # Step 5: Running tests
-    - name: Running tests
-      run: dotnet test --configuration Release --no-build
-    
-    # Step 6: Publishing
-    - name: Publishing
-      run: dotnet publish Release -o ./publish
-        
-    # Step 7: Upload the Artifact
-    - name: Upload artifact
-      uses: upload/artifact@v4
-      with:
-        name: dotnet-app
-        path: ./publish
+      # Step 3: Restoring dependencies
+      - name: Restoring dependencies
+        run: dotnet restore
+
+      # Step 4: Build solution
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      # Step 5: Running tests
+      - name: Running tests
+        run: dotnet test --configuration Release --no-build
+
+      # Step 6: Publishing
+      - name: Publishing
+        run: dotnet publish Release -o ./publish
+
+      # Step 7: Upload the Artifact
+      - name: Upload artifact
+        uses: upload/artifact@v4
+        with:
+          name: dotnet-app
+          path: ./publish
