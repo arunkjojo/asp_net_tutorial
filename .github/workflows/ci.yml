@@ -40,22 +40,22 @@ jobs:
           # Set the version as an environment variable for later steps
           echo "version_in_title=$VERSION_IN_TITLE" >> $GITHUB_ENV
 
-      # Step 3: Check changelog.md for updated version
+      # Step 3: Check CHANGELOG.md for updated version
       - name: Validate Changelog Version
         run: |
-          # Ensure changelog.md exists
-          if [[ ! -f changelog.md ]]; then
-            echo "changelog.md file not found."
+          # Ensure CHANGELOG.md exists
+          if [[ ! -f CHANGELOG.md ]]; then
+            echo "CHANGELOG.md file not found."
             exit 1
           fi
 
-          # Extract version from changelog.md
-          VERSION_IN_CHANGELOG=$(grep -Eo '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' changelog.md | head -n 1 | sed 's/^## \[//' | sed 's/\]//')
-          echo "Version extracted from changelog.md: $VERSION_IN_CHANGELOG"
+          # Extract version from CHANGELOG.md
+          VERSION_IN_CHANGELOG=$(grep -Eo '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' CHANGELOG.md | head -n 1 | sed 's/^## \[//' | sed 's/\]//')
+          echo "Version extracted from CHANGELOG.md: $VERSION_IN_CHANGELOG"
 
           # Compare versions
           if [[ "$VERSION_IN_CHANGELOG" != "$VERSION_IN_TITLE" ]]; then
-            echo "Version mismatch: PR title version ($VERSION_IN_TITLE) does not match changelog.md version ($VERSION_IN_CHANGELOG)."
+            echo "Version mismatch: PR title version ($VERSION_IN_TITLE) does not match CHANGELOG.md version ($VERSION_IN_CHANGELOG)."
             exit 1
           fi
 
