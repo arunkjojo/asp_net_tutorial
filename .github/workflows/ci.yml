@@ -1,0 +1,82 @@
+name: Continuous Integration
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-pull-request:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    # Step 2: Validate pull request title
+    - name: Validate Pull Request Title
+      id: validate-title
+      run: |
+        # Extract the PR title
+        PR_TITLE="${{ github.event.pull_request.title }}"
+        
+        # Regex pattern for title validation
+        PATTERN="^ASP_NET-[0-9]+\.[0-9]+\.[0-9]+: .+$"
+        
+        # Validate title format
+        if [[ ! "$PR_TITLE" =~ $PATTERN ]]; then
+          echo "Invalid PR title. Must match the format 'ASP_NET-{version number}: {title}'"
+          exit 1
+        fi
+
+        # Extract the version number from the title
+        VERSION_IN_TITLE=$(echo "$PR_TITLE" | sed -E 's/^ASP_NET-([0-9]+\.[0-9]+\.[0-9]+): .+$/\1/')
+        echo "Version extracted from title: $VERSION_IN_TITLE"
+        echo "version_in_title=$VERSION_IN_TITLE" >> $GITHUB_ENV
+
+    # Step 3: Check changelog.md for updated version
+    - name: Validate Changelog Version
+      run: |
+        # Ensure changelog.md exists
+        if [[ ! -f changelog.md ]]; then
+          echo "changelog.md file not found."
+          exit 1
+        fi
+
+        # Extract version from changelog.md
+        VERSION_IN_CHANGELOG=$(grep -Eo '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' changelog.md | head -n 1 | sed 's/^## \[//' | sed 's/\]//')
+        echo "Version extracted from changelog.md: $VERSION_IN_CHANGELOG"
+
+        # Compare versions
+        if [[ "$VERSION_IN_CHANGELOG" != "$VERSION_IN_TITLE" ]]; then
+          echo "Version mismatch: PR title version ($VERSION_IN_TITLE) does not match changelog.md version ($VERSION_IN_CHANGELOG)."
+          exit 1
+        fi
+
+    # Step 4: Run Tests
+    - name: Run Tests
+      run: |
+        echo "Restoring dependencies..."
+        dotnet restore
+
+        echo "Building the solution..."
+        dotnet build --configuration Release --no-restore
+
+        echo "Running tests..."
+        dotnet test --no-build
+
+        echo "Publishing..."
+        dotnet publish Release -o ./publish
+        
+    # Step 5: Upload the Artifact
+    - name: Upload artifact
+      uses: upload/artifact@v4
+      with:
+        name: dotnet-app
+        path: ./publish
+        
+    # Step 6: Approve the pull request if all checks pass
+    - name: Approve Pull Request
+      if: success()
+      uses: hmarr/auto-approve-action@v3
