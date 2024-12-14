@@ -49,13 +49,18 @@ jobs:
             exit 1
           fi
 
+          # Extract the current version from the main branch using git tags or changelog
+          VERSION_IN_MAIN=$(git fetch --tags && git tag --sort=version:refname | tail -n 1)
+          echo "Version in main branch: $VERSION_IN_MAIN"
+
           # Extract version from CHANGELOG.md
           VERSION_IN_CHANGELOG=$(grep -Eo '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' CHANGELOG.md | head -n 1 | sed 's/^## \[//' | sed 's/\]//')
           echo "Version extracted from CHANGELOG.md: $VERSION_IN_CHANGELOG"
 
-          # Compare versions
-          if [[ "$VERSION_IN_CHANGELOG" != "$VERSION_IN_TITLE" ]]; then
-            echo "Version mismatch: PR title version ($VERSION_IN_TITLE) does not match CHANGELOG.md version ($VERSION_IN_CHANGELOG)."
+          # Compare versions using version sort
+          # If the changelog version is less than the main branch version, exit with an error
+          if [[ "$(echo -e "$VERSION_IN_CHANGELOG\n$VERSION_IN_MAIN" | sort -V | head -n 1)" != "$VERSION_IN_MAIN" ]]; then
+            echo "The version in CHANGELOG.md ($VERSION_IN_CHANGELOG) is older than the version in main ($VERSION_IN_MAIN)."
             exit 1
           fi
 
